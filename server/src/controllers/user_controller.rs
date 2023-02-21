@@ -1,28 +1,14 @@
 use crate::{
-    schema::users::dsl::*,
     services::user_service::{UserService, UserServiceInterface},
     DbPool,
 };
 use actix_web::{
-    error::ResponseError,
-    get,
-    http::{header::ContentType, StatusCode},
-    post, put,
-    web::Data,
+    get, post,
     web::Path,
     web::{self, Json},
     Error, HttpResponse,
 };
-use derive_more::Display;
-use diesel::{
-    prelude::*,
-    r2d2::{self, ConnectionManager},
-};
-use diesel::{RunQueryDsl, SqliteConnection};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-use crate::database_models::users::{self, NewUser};
 
 #[derive(Serialize, Deserialize)]
 pub struct UserDTO {
