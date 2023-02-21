@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
     env_logger::init();
 
     dotenv::dotenv().ok();
-    let conn_spec = std::env::var("DATABASE_URL").expect("DATABASE_URL");
+    let conn_spec = std::env::var("DATABASE_URL").expect("Failed to find database url");
     let manager = ConnectionManager::<SqliteConnection>::new(conn_spec);
     let pool = r2d2::Pool::builder()
         .build(manager)
