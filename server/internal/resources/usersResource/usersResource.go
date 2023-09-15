@@ -36,38 +36,54 @@ type NewUserDTO struct {
 	Name string `json:"name"`
 }
 
+type Response[T any] struct {
+	Data    *T
+	Message string
+	Success bool
+}
+
 func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 	decoder := json.NewDecoder(r.Body)
 	var newUser NewUserDTO
 	err := decoder.Decode(&newUser)
 	if err != nil {
 		slog.Error("Failed to parse request body", err)
-		w.WriteHeader(http.StatusBadRequest)
+		sendResponse[interface{}](w, nil, false, "Failed to parse request body", http.StatusBadRequest)
 		return
 	}
 
 	if strings.TrimSpace(newUser.Name) == "" {
 		slog.Error("Name field missing from request body")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Include a name"))
+		sendResponse[interface{}](w, nil, false, "The 'name' field is required", http.StatusBadRequest)
 		return
 	}
 
 	user, err := rs.userService.CreateUser(newUser.Name)
 	if err != nil {
 		slog.Error("Error creating user", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		sendResponse[interface{}](w, nil, false, "Error creating user", http.StatusInternalServerError)
 		return
 	}
 
-	response, err := json.Marshal(user)
+	sendResponse(w, &user, true, "New user created", http.StatusCreated)
+}
+
+func sendResponse[T any](w http.ResponseWriter, data *T, success bool, message string, status int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	response := Response[T]{
+		Data:    data,
+		Success: success,
+		Message: message,
+	}
+
+	bytes, err := json.Marshal(response)
 	if err != nil {
-		slog.Error("Error marshalling user data", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		slog.Error("Failed to serialize response", err)
+		sendResponse[interface{}](w, nil, false, "Failed to serialize repsonse", http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte(response))
+	w.Write(bytes)
 }
