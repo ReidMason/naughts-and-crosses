@@ -20,10 +20,11 @@ func New(ctx context.Context, queries *database.Queries) *UserService {
 	}
 }
 
-func (us *UserService) CreateUser(name string) database.User {
+func (us *UserService) CreateUser(name string) (database.User, error) {
 	slog.Info("Creating new user", "name", name)
 
-	result, err := us.queries.CreateUser(us.ctx, database.CreateUserParams{
+	var newUser database.User
+	newUser, err := us.queries.CreateUser(us.ctx, database.CreateUserParams{
 		Name:  name,
 		Token: uuid.New().String(),
 	})
@@ -32,5 +33,5 @@ func (us *UserService) CreateUser(name string) database.User {
 		slog.Info("Failed to create new user")
 	}
 
-	return result
+	return newUser, err
 }

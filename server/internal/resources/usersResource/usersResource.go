@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/ReidMason/naughts-and-crosses/server/internal/database"
 	"github.com/go-chi/chi"
@@ -14,7 +15,7 @@ type usersResource struct {
 }
 
 type UserService interface {
-	CreateUser(name string) database.User
+	CreateUser(name string) (database.User, error)
 }
 
 func New(userService UserService) *usersResource {
@@ -41,16 +42,31 @@ func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 	err := decoder.Decode(&newUser)
 	if err != nil {
 		slog.Error("Failed to parse request body", err)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	user := rs.userService.CreateUser(newUser.Name)
+	if strings.TrimSpace(newUser.Name) == "" {
+		slog.Error("Name field missing from request body")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Include a name"))
+		return
+	}
 
-	b, err := json.Marshal(user)
+	user, err := rs.userService.CreateUser(newUser.Name)
+	if err != nil {
+		slog.Error("Error creating user", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(user)
 	if err != nil {
 		slog.Error("Error marshalling user data", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	w.Write([]byte(b))
+	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(response))
 }
