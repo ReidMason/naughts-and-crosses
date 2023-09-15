@@ -1,0 +1,9 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "queries.sql"
+    schema: "../internal/migrations/sqlMigrations"
+    gen:
+      go:
+        package: "animeDb"
+        out: "../internal/database"
