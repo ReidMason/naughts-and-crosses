@@ -37,6 +37,7 @@ type NewUserDTO struct {
 }
 
 func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	decoder := json.NewDecoder(r.Body)
 	var newUser NewUserDTO
 	err := decoder.Decode(&newUser)
