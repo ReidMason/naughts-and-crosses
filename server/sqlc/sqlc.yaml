@@ -5,5 +5,5 @@ sql:
     schema: "../internal/migrations/sqlMigrations"
     gen:
       go:
-        package: "animeDb"
+        package: "database"
         out: "../internal/database"

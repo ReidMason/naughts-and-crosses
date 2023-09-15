@@ -1,14 +1,17 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"log"
 	"net/http"
 
 	"log/slog"
 
+	"github.com/ReidMason/naughts-and-crosses/server/internal/database"
 	"github.com/ReidMason/naughts-and-crosses/server/internal/migrations"
 	"github.com/ReidMason/naughts-and-crosses/server/internal/resources/usersResource"
+	"github.com/ReidMason/naughts-and-crosses/server/internal/userService"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -22,11 +25,16 @@ func main() {
 
 	migrations.Migrate(db)
 
+	ctx := context.Background()
+	queries := database.New(db)
+
+	userService := userService.New(ctx, queries)
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
 	r.Route("/api", func(r chi.Router) {
-		r.Mount("/user", usersResource.New().Routes())
+		r.Mount("/user", usersResource.New(userService).Routes())
 	})
 
 	slog.Info("Http server started")
