@@ -8,6 +8,7 @@ import (
 	"log/slog"
 
 	"github.com/ReidMason/naughts-and-crosses/server/internal/migrations"
+	"github.com/ReidMason/naughts-and-crosses/server/internal/resources/usersResource"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -24,8 +25,8 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome"))
+	r.Route("/api", func(r chi.Router) {
+		r.Mount("/user", usersResource.New().Routes())
 	})
 
 	slog.Info("Http server started")
