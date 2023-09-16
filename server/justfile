@@ -1,0 +1,2 @@
+sqlc-generate:
+  sqlc generate -f sqlc/sqlc.yaml
