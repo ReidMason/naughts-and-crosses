@@ -1,9 +1,11 @@
 package usersResource
 
 import (
+	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/ReidMason/naughts-and-crosses/server/internal/database"
@@ -16,6 +18,7 @@ type usersResource struct {
 
 type UserService interface {
 	CreateUser(name string) (database.User, error)
+	GetUser(id int32) (database.User, error)
 }
 
 func New(userService UserService) *usersResource {
@@ -28,8 +31,26 @@ func (rs usersResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/", rs.Create)
+	r.Route("/{userId}", func(r chi.Router) {
+		r.Use(rs.userCtx)
+		r.Get("/", rs.Get)
+	})
 
 	return r
+}
+
+func (ur usersResource) userCtx(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userId, err := strconv.ParseInt(chi.URLParam(r, "userId"), 10, 32)
+		if err != nil {
+			slog.Info("Failed to convert userId", err)
+			sendResponse[interface{}](w, nil, false, "User not found", http.StatusNotFound)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "user", int32(userId))
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 type NewUserDTO struct {
@@ -66,6 +87,19 @@ func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendResponse(w, &user, true, "New user created", http.StatusCreated)
+}
+
+func (ur usersResource) Get(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userId := ctx.Value("user").(int32)
+
+	user, err := ur.userService.GetUser(userId)
+	if err != nil {
+		sendResponse[interface{}](w, nil, false, "User not found", http.StatusNotFound)
+		return
+	}
+
+	sendResponse(w, &user, true, "User found", http.StatusOK)
 }
 
 func sendResponse[T any](w http.ResponseWriter, data *T, success bool, message string, status int) {

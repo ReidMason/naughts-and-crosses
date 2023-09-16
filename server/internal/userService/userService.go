@@ -35,3 +35,16 @@ func (us *UserService) CreateUser(name string) (database.User, error) {
 
 	return newUser, err
 }
+
+func (us *UserService) GetUser(userId int32) (database.User, error) {
+	slog.Info("Getting user", "UserID", userId)
+
+	var user database.User
+	user, err := us.queries.GetUser(us.ctx, userId)
+
+	if err != nil {
+		slog.Info("Failed to find user")
+	}
+
+	return user, err
+}
