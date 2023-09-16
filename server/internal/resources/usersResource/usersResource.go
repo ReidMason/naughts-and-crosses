@@ -89,6 +89,13 @@ func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 	sendResponse(w, &user, true, "New user created", http.StatusCreated)
 }
 
+type UserDTO struct {
+	Name   string
+	ID     int32
+	Wins   int64
+	Losses int64
+}
+
 func (ur usersResource) Get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userId := ctx.Value("user").(int32)
@@ -99,7 +106,13 @@ func (ur usersResource) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sendResponse(w, &user, true, "User found", http.StatusOK)
+	userResponse := UserDTO{
+		Name:   user.Name,
+		ID:     user.ID,
+		Wins:   user.Wins,
+		Losses: user.Losses,
+	}
+	sendResponse(w, &userResponse, true, "User found", http.StatusOK)
 }
 
 func sendResponse[T any](w http.ResponseWriter, data *T, success bool, message string, status int) {
