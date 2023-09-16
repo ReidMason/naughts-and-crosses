@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/ReidMason/naughts-and-crosses/server/internal/database"
+	httpHelper "github.com/ReidMason/naughts-and-crosses/server/internal/helpers"
 	"github.com/go-chi/chi"
 )
 
@@ -44,7 +45,7 @@ func (ur usersResource) userCtx(next http.Handler) http.Handler {
 		userId, err := strconv.ParseInt(chi.URLParam(r, "userId"), 10, 32)
 		if err != nil {
 			slog.Info("Failed to convert userId", err)
-			sendResponse[interface{}](w, nil, false, "User not found", http.StatusNotFound)
+			httpHelper.SendResponse[interface{}](w, nil, false, "User not found", http.StatusNotFound)
 			return
 		}
 
@@ -57,36 +58,30 @@ type NewUserDTO struct {
 	Name string `json:"name"`
 }
 
-type Response[T any] struct {
-	Data    *T
-	Message string
-	Success bool
-}
-
 func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var newUser NewUserDTO
 	err := decoder.Decode(&newUser)
 	if err != nil {
 		slog.Error("Failed to parse request body", err)
-		sendResponse[interface{}](w, nil, false, "Failed to parse request body", http.StatusBadRequest)
+		httpHelper.SendResponse[interface{}](w, nil, false, "Failed to parse request body", http.StatusBadRequest)
 		return
 	}
 
 	if strings.TrimSpace(newUser.Name) == "" {
 		slog.Error("Name field missing from request body")
-		sendResponse[interface{}](w, nil, false, "The 'name' field is required", http.StatusBadRequest)
+		httpHelper.SendResponse[interface{}](w, nil, false, "The 'name' field is required", http.StatusBadRequest)
 		return
 	}
 
 	user, err := rs.userService.CreateUser(newUser.Name)
 	if err != nil {
 		slog.Error("Error creating user", err)
-		sendResponse[interface{}](w, nil, false, "Error creating user", http.StatusInternalServerError)
+		httpHelper.SendResponse[interface{}](w, nil, false, "Error creating user", http.StatusInternalServerError)
 		return
 	}
 
-	sendResponse(w, &user, true, "New user created", http.StatusCreated)
+	httpHelper.SendResponse(w, &user, true, "New user created", http.StatusCreated)
 }
 
 type UserDTO struct {
@@ -102,7 +97,7 @@ func (ur usersResource) Get(w http.ResponseWriter, r *http.Request) {
 
 	user, err := ur.userService.GetUser(userId)
 	if err != nil {
-		sendResponse[interface{}](w, nil, false, "User not found", http.StatusNotFound)
+		httpHelper.SendResponse[interface{}](w, nil, false, "User not found", http.StatusNotFound)
 		return
 	}
 
@@ -112,25 +107,5 @@ func (ur usersResource) Get(w http.ResponseWriter, r *http.Request) {
 		Wins:   user.Wins,
 		Losses: user.Losses,
 	}
-	sendResponse(w, &userResponse, true, "User found", http.StatusOK)
-}
-
-func sendResponse[T any](w http.ResponseWriter, data *T, success bool, message string, status int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-
-	response := Response[T]{
-		Data:    data,
-		Success: success,
-		Message: message,
-	}
-
-	bytes, err := json.Marshal(response)
-	if err != nil {
-		slog.Error("Failed to serialize response", err)
-		sendResponse[interface{}](w, nil, false, "Failed to serialize repsonse", http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bytes)
+	httpHelper.SendResponse(w, &userResponse, true, "User found", http.StatusOK)
 }
