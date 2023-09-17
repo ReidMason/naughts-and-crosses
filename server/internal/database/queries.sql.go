@@ -15,7 +15,7 @@ INSERT INTO users (
 ) VALUES (
   $1, $2
 )
-RETURNING id, name, token, wins, losses
+RETURNING id, name, token, wins, losses, datecreated
 `
 
 type CreateUserParams struct {
@@ -32,12 +32,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Token,
 		&i.Wins,
 		&i.Losses,
+		&i.Datecreated,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, name, token, wins, losses FROM users 
+SELECT id, name, token, wins, losses, datecreated FROM users 
 WHERE id = $1
 `
 
@@ -50,6 +51,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 		&i.Token,
 		&i.Wins,
 		&i.Losses,
+		&i.Datecreated,
 	)
 	return i, err
 }

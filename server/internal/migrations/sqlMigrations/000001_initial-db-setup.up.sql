@@ -3,5 +3,6 @@ CREATE TABLE users (
   name TEXT NOT NULL,
   token TEXT NOT NULL,
   wins bigint default 0 NOT NULL,
-  losses bigint default 0 NOT NULL
+  losses bigint default 0 NOT NULL,
+  dateCreated timestamp DEFAULT now() NOT NULL
 );

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ReidMason/naughts-and-crosses/server/internal/database"
 	httpHelper "github.com/ReidMason/naughts-and-crosses/server/internal/helpers"
@@ -85,10 +86,11 @@ func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserDTO struct {
-	Name   string
-	ID     int32
-	Wins   int64
-	Losses int64
+	Name        string
+	ID          int32
+	Wins        int64
+	Losses      int64
+	DateCreated time.Time
 }
 
 func (ur usersResource) Get(w http.ResponseWriter, r *http.Request) {
