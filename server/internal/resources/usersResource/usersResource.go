@@ -86,11 +86,11 @@ func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 type UserDTO struct {
+	DateCreated time.Time
 	Name        string
-	ID          int32
 	Wins        int64
 	Losses      int64
-	DateCreated time.Time
+	ID          int32
 }
 
 func (ur usersResource) Get(w http.ResponseWriter, r *http.Request) {
