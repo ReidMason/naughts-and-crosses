@@ -32,10 +32,10 @@ func New(userService UserService) *usersResource {
 func (rs usersResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
-	r.Post("/", rs.Create)
+	r.Post("/", rs.create)
 	r.Route("/{userId}", func(r chi.Router) {
 		r.Use(rs.userCtx)
-		r.Get("/", rs.Get)
+		r.Get("/", rs.get)
 	})
 
 	return r
@@ -59,7 +59,7 @@ type NewUserDTO struct {
 	Name string `json:"name"`
 }
 
-func (rs usersResource) Create(w http.ResponseWriter, r *http.Request) {
+func (rs usersResource) create(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	var newUser NewUserDTO
 	err := decoder.Decode(&newUser)
@@ -93,7 +93,7 @@ type UserDTO struct {
 	ID          int32
 }
 
-func (ur usersResource) Get(w http.ResponseWriter, r *http.Request) {
+func (ur usersResource) get(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userId := ctx.Value("user").(int32)
 
