@@ -10,6 +10,7 @@ import (
 
 	"github.com/ReidMason/naughts-and-crosses/server/internal/database"
 	"github.com/ReidMason/naughts-and-crosses/server/internal/migrations"
+	"github.com/ReidMason/naughts-and-crosses/server/internal/resources/routesResource"
 	"github.com/ReidMason/naughts-and-crosses/server/internal/resources/usersResource"
 	"github.com/ReidMason/naughts-and-crosses/server/internal/userService"
 	"github.com/go-chi/chi"
@@ -36,6 +37,8 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		r.Mount("/user", usersResource.New(userService).Routes())
 	})
+
+	r.Mount("/", routesResource.New().Routes())
 
 	slog.Info("Http server started")
 	http.ListenAndServe("localhost:3000", r)
