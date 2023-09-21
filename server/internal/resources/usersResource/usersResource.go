@@ -2,6 +2,7 @@ package usersResource
 
 import (
 	"context"
+	"html/template"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -64,14 +65,17 @@ func (rs usersResource) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := rs.userService.CreateUser(username)
+	_, err := rs.userService.CreateUser(username)
 	if err != nil {
 		slog.Error("Error creating user", err)
 		httpHelper.SendResponse[interface{}](w, nil, false, "Error creating user", http.StatusInternalServerError)
 		return
 	}
 
-	httpHelper.SendResponse(w, &user, true, "New user created", http.StatusCreated)
+	// httpHelper.SendResponse(w, &user, true, "New user created", http.StatusCreated)
+
+	templ := template.Must(template.ParseFiles("internal/templates/registrationSuccess.html"))
+	templ.Execute(w, nil)
 }
 
 type UserDTO struct {
