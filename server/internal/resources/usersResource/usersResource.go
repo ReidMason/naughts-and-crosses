@@ -2,7 +2,6 @@ package usersResource
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -55,27 +54,17 @@ func (ur usersResource) userCtx(next http.Handler) http.Handler {
 	})
 }
 
-type NewUserDTO struct {
-	Name string `json:"name"`
-}
-
 func (rs usersResource) create(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var newUser NewUserDTO
-	err := decoder.Decode(&newUser)
-	if err != nil {
-		slog.Error("Failed to parse request body", err)
-		httpHelper.SendResponse[interface{}](w, nil, false, "Failed to parse request body", http.StatusBadRequest)
-		return
-	}
+	r.ParseForm()
+	username := strings.TrimSpace(r.Form.Get("username"))
 
-	if strings.TrimSpace(newUser.Name) == "" {
+	if username == "" {
 		slog.Error("Name field missing from request body")
 		httpHelper.SendResponse[interface{}](w, nil, false, "The 'name' field is required", http.StatusBadRequest)
 		return
 	}
 
-	user, err := rs.userService.CreateUser(newUser.Name)
+	user, err := rs.userService.CreateUser(username)
 	if err != nil {
 		slog.Error("Error creating user", err)
 		httpHelper.SendResponse[interface{}](w, nil, false, "Error creating user", http.StatusInternalServerError)
