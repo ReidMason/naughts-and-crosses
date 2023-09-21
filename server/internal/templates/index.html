@@ -10,8 +10,12 @@
   </head>
   <body class="p-8">
     <h1 class="text-5xl semibold pb-4">Naughts and Crosses!</h1>
-    <form>
-      <input class="p-2 bg-slate-300 rounded-md" />
+    <form hx-post="/api/user">
+      <input
+        class="p-2 bg-slate-300 rounded-md"
+        name="username"
+        placeholder="Username"
+      />
     </form>
   </body>
 </html>
