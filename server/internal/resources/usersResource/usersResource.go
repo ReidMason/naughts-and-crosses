@@ -72,9 +72,7 @@ func (rs usersResource) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// httpHelper.SendResponse(w, &user, true, "New user created", http.StatusCreated)
-
-	templ := template.Must(template.ParseFiles("internal/templates/registrationSuccess.html"))
+	templ := template.Must(template.ParseFiles("internal/templates/partials/registrationSuccess.html"))
 	templ.Execute(w, nil)
 }
 
