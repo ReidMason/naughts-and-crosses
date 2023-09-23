@@ -65,12 +65,16 @@ func (rs usersResource) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := rs.userService.CreateUser(username)
+	newUser, err := rs.userService.CreateUser(username)
 	if err != nil {
 		slog.Error("Error creating user", err)
 		httpHelper.SendResponse[interface{}](w, nil, false, "Error creating user", http.StatusInternalServerError)
 		return
 	}
+
+	expiration := time.Now().Add(365 * 24 * time.Hour)
+	cookie := http.Cookie{Name: "accessToken", Path: "/", Value: newUser.Token, Expires: expiration}
+	http.SetCookie(w, &cookie)
 
 	templ := template.Must(template.ParseFiles("internal/templates/partials/registrationSuccess.html"))
 	templ.Execute(w, nil)
