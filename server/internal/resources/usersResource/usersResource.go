@@ -3,6 +3,7 @@ package usersResource
 import (
 	"context"
 	"html/template"
+	"log"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -72,7 +73,8 @@ func (rs usersResource) create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expiration := time.Now().Add(365 * 24 * time.Hour)
+	expiration := time.Now().Add(10 * 365 * 24 * time.Hour)
+	log.Println(expiration)
 	cookie := http.Cookie{Name: "accessToken", Path: "/", Value: newUser.Token, Expires: expiration}
 	http.SetCookie(w, &cookie)
 
