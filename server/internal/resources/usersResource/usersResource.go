@@ -34,6 +34,7 @@ func (rs usersResource) Routes() chi.Router {
 	r := chi.NewRouter()
 
 	r.Post("/", rs.create)
+	r.Get("/", rs.getCurrentUser)
 	r.Route("/{userId}", func(r chi.Router) {
 		r.Use(rs.userCtx)
 		r.Get("/", rs.get)
@@ -54,6 +55,20 @@ func (ur usersResource) userCtx(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), "user", int32(userId))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func (rs usersResource) getCurrentUser(w http.ResponseWriter, r *http.Request) {
+	accessToken := ""
+	for _, cookie := range r.Cookies() {
+		if cookie.Name == "accessToken" {
+			accessToken = cookie.Value
+		}
+	}
+
+	if accessToken == "" {
+		httpHelper.SendResponse[interface{}](w, nil, false, "User not yet authenticated", http.StatusUnauthorized)
+		return
+	}
 }
 
 func (rs usersResource) create(w http.ResponseWriter, r *http.Request) {
