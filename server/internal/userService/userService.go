@@ -20,6 +20,13 @@ func New(ctx context.Context, queries *database.Queries) *UserService {
 	}
 }
 
+func (us *UserService) GetUserByToken(token string) (database.User, error) {
+	var newUser database.User
+	newUser, err := us.queries.GetUserByToken(us.ctx, token)
+
+	return newUser, err
+}
+
 func (us *UserService) CreateUser(name string) (database.User, error) {
 	slog.Info("Creating new user", "name", name)
 

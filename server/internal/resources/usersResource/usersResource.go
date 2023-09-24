@@ -22,6 +22,7 @@ type usersResource struct {
 type UserService interface {
 	CreateUser(name string) (database.User, error)
 	GetUser(id int32) (database.User, error)
+	GetUserByToken(token string) (database.User, error)
 }
 
 func New(userService UserService) *usersResource {
@@ -66,6 +67,12 @@ func (rs usersResource) getCurrentUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if accessToken == "" {
+		httpHelper.SendResponse[interface{}](w, nil, false, "User not yet authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	_, err := rs.userService.GetUserByToken(accessToken)
+	if err != nil {
 		httpHelper.SendResponse[interface{}](w, nil, false, "User not yet authenticated", http.StatusUnauthorized)
 		return
 	}
