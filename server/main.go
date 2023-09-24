@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -39,6 +40,11 @@ func main() {
 	})
 
 	r.Mount("/", routesResource.New().Routes())
+
+	r.Get("/login-successful", func(w http.ResponseWriter, _ *http.Request) {
+		templ := template.Must(template.ParseFiles("internal/templates/loginSuccessful.html"))
+		templ.Execute(w, nil)
+	})
 
 	slog.Info("Http server started")
 	http.ListenAndServe("localhost:3000", r)

@@ -69,6 +69,8 @@ func (rs usersResource) getCurrentUser(w http.ResponseWriter, r *http.Request) {
 		httpHelper.SendResponse[interface{}](w, nil, false, "User not yet authenticated", http.StatusUnauthorized)
 		return
 	}
+
+	w.Header().Set("HX-Redirect", "/login-successful")
 }
 
 func (rs usersResource) create(w http.ResponseWriter, r *http.Request) {
