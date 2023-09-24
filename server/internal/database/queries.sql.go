@@ -55,3 +55,22 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 	)
 	return i, err
 }
+
+const getUserByToken = `-- name: GetUserByToken :one
+SELECT id, name, token, wins, losses, datecreated FROM users 
+WHERE token = $1
+`
+
+func (q *Queries) GetUserByToken(ctx context.Context, token string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByToken, token)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Token,
+		&i.Wins,
+		&i.Losses,
+		&i.Datecreated,
+	)
+	return i, err
+}
